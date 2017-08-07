@@ -1,8 +1,8 @@
-Mon Aug 07 13:36:18 CEST 2017 : Apache Derby Hálózati kiszolgáló - 10.10.2.0 - (1582446) elindult és kész a kapcsolatok fogadására a(z) {3} 1527 portján 
+Mon Aug 07 17:26:42 CEST 2017 : Apache Derby Hálózati kiszolgáló - 10.10.2.0 - (1582446) elindult és kész a kapcsolatok fogadására a(z) {3} 1527 portján 
 ----------------------------------------------------------------
-Mon Aug 07 13:36:18 CEST 2017:
- Derby The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446) változat betöltése: a816c00e-015d-bc7b-37df-fffff3e5378f példány
-a(z) C:\Users\Tóth Ádám\Documents\NetBeansProjects\Cinema-Maven\cinema_maven\db\cinema adatbázis-könyvtáron: sun.misc.Launcher$AppClassLoader@5e2de80c 
+Mon Aug 07 17:26:42 CEST 2017:
+ Derby The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446) változat betöltése: a816c00e-015d-bd4e-2713-0000542cd3de példány
+a(z) C:\Users\Tóth Ádám\Documents\NetBeansProjects\cinema_maven\db\cinema adatbázis-könyvtáron: sun.misc.Launcher$AppClassLoader@5e2de80c 
 
 java.vendor=Oracle Corporation
 java.runtime.version=1.8.0_60-b27
@@ -10,5 +10,5 @@ user.dir=C:\Program Files\glassfish-4.1.1\javadb
 os.name=Windows 8.1
 os.arch=amd64
 os.version=6.3
-derby.system.home=C:\Users\Tóth Ádám\Documents\NetBeansProjects\Cinema-Maven\cinema_maven\db
+derby.system.home=C:\Users\Tóth Ádám\Documents\NetBeansProjects\cinema_maven\db
 Az adatbázis-osztálybetöltõ elindult - derby.database.classpath=''
