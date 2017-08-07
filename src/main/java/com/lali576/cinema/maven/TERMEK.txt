@@ -1,0 +1,3 @@
+Tar Bela; 5; 8
+Tartovsky; 4; 7
+Andy Vajna; 7; 10

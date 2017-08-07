@@ -1,0 +1,5 @@
+Ryan kozlegeny megmentese; USA; false; Steven Spielberg; War is everywhere; 150; 4; 6
+Micimacko ujabb kalandjai; USA; false; John Lounsbery; Micimacko es baratai ujabb kalandjai a szazholdaspagonjban; 90; 1; 8
+Kodjatszma; USA; true; Morten Tyldum; Egy orult talalmanya, ami megvaltozthatatja a haboru kimenetelet; 114; 3; 10
+Kontroll; Magyarorszag; false; Antal Nimrod; Budapest metrohalozata, hogy meg soshase latta; 110; 4; 5
+Akira; Japan; true; Katsuhiro Otomo; -KANEDA!!! -TETSUO!!!; 120; 5; 10

@@ -1,0 +1,14 @@
+Mon Aug 07 11:57:42 CEST 2017 : Apache Derby Hálózati kiszolgáló - 10.10.2.0 - (1582446) elindult és kész a kapcsolatok fogadására a(z) {3} 1527 portján 
+----------------------------------------------------------------
+Mon Aug 07 11:57:42 CEST 2017:
+ Derby The Apache Software Foundation - Apache Derby - 10.10.2.0 - (1582446) változat betöltése: a816c00e-015d-bc20-f3c9-00004955bfea példány
+a(z) C:\Users\Tóth Ádám\Documents\NetBeansProjects\cinema\db\cinema adatbázis-könyvtáron: sun.misc.Launcher$AppClassLoader@5e2de80c 
+
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_60-b27
+user.dir=C:\Program Files\glassfish-4.1.1\javadb
+os.name=Windows 8.1
+os.arch=amd64
+os.version=6.3
+derby.system.home=C:\Users\Tóth Ádám\Documents\NetBeansProjects\cinema\db
+Az adatbázis-osztálybetöltõ elindult - derby.database.classpath=''
