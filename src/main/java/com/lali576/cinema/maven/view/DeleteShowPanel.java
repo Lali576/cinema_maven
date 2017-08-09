@@ -1,12 +1,13 @@
 package com.lali576.cinema.maven.view;
 
 import com.lali576.cinema.maven.controller.Logic;
+import com.lali576.cinema.maven.exception.InvalidShowDeletionException;
+import com.lali576.cinema.maven.exception.ShowDatabaseException;
 import com.lali576.cinema.maven.model.Show;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -33,7 +34,7 @@ public class DeleteShowPanel extends JPanel {
         add(button, BorderLayout.NORTH);
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(shows.size(), 4));
-        for(Show show : shows) {
+        shows.stream().map((show) -> {
             JLabel timeLabel = new JLabel(show.getStartTime());
             panel.add(timeLabel);
             JLabel titleLabel = new JLabel(show.getMovie().getTitle());
@@ -42,8 +43,10 @@ public class DeleteShowPanel extends JPanel {
             panel.add(roomNameLabel);
             JButton deleteButton = new JButton("X");
             deleteButton.addActionListener(new DeleteShow(show));
+            return deleteButton;
+        }).forEachOrdered((deleteButton) -> {
             panel.add(deleteButton);
-        }
+        });
         add(panel, BorderLayout.CENTER);
         revalidate();
         repaint();
@@ -59,15 +62,11 @@ public class DeleteShowPanel extends JPanel {
        @Override
         public void actionPerformed(ActionEvent e) {   
             try{
-                if(show.isTicketFree()) {
-                    logic.delete.deleteShow(show);
-                    shows = logic.select.getShows();
-                    setupDeleteShowPanel();
-                } else {
-                    JOptionPane.showMessageDialog(null, "A megadott előadásra még van foglalt jegy!", "Törlési hiba!", JOptionPane.INFORMATION_MESSAGE);
-                }
-            } catch(SQLException sqle) {
-                JOptionPane.showMessageDialog(null, "Az előadás törlése közben hiba lépett fel!", "Adatbázis hiba!", JOptionPane.INFORMATION_MESSAGE);
+                logic.delete.deleteShow(show);
+                shows = logic.select.getShows();
+                setupDeleteShowPanel();
+            } catch(InvalidShowDeletionException | ShowDatabaseException ex) {
+                ex.writeOutEception();
             }
         } 
     }

@@ -1,6 +1,15 @@
 package com.lali576.cinema.maven.view;
 
 import com.lali576.cinema.maven.controller.Logic;
+import com.lali576.cinema.maven.exception.CinemaException;
+import com.lali576.cinema.maven.exception.InsertNewShowException;
+import com.lali576.cinema.maven.exception.InvalidMovieAgeRestrictionException;
+import com.lali576.cinema.maven.exception.InvalidStartTimeAndRoomException;
+import com.lali576.cinema.maven.exception.InvalidStartTimeFormationException;
+import com.lali576.cinema.maven.exception.InvalidStartTimeIntervalException;
+import com.lali576.cinema.maven.exception.MovieCollisionException;
+import com.lali576.cinema.maven.exception.MovieParallelException;
+import com.lali576.cinema.maven.exception.MovieScreeningException;
 import com.lali576.cinema.maven.model.Movie;
 import com.lali576.cinema.maven.model.Room;
 import com.lali576.cinema.maven.model.Show;
@@ -14,7 +23,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -118,78 +126,77 @@ public class NewShowPanel extends JPanel {
                     logic.insert.newShow(show);
                     mainFrame.getShowPanelByNewShowPanel();
                 }
-            } catch(SQLException sqle) {
-                JOptionPane.showMessageDialog(null, "A megadott előadás felvétele közben hba történt!", "Adatbázis hiba!", JOptionPane.INFORMATION_MESSAGE);
+            } catch(InsertNewShowException ex) {
+                ex.writeOutEception();
             }            
         } 
     }
     
-    public static boolean isAllRight(Logic logic, Movie movie, Room room, String startTime) throws SQLException {
-        return (isShowUnique(movie, room, startTime) && startTimeRegExp(startTime) && movieParallel(movie, startTime) && moviePlayNumber(movie) && rightSchedule(movie, room, startTime) && movieAge(movie, startTime));        
+    public static boolean isAllRight(Logic logic, Movie movie, Room room, String startTime) {
+        try {
+            return (isShowUnique(movie, room, startTime) && startTimeRegExp(startTime) && movieParallel(movie, startTime) && moviePlayNumber(movie) && rightSchedule(movie, room, startTime) && movieAge(movie, startTime));        
+        } catch(CinemaException ex) {
+            ex.writeOutEception();
+        }
+        
+        return false;
     }
     
-    private static boolean isShowUnique(Movie movie, Room room, String startTime) {
+    private static boolean isShowUnique(Movie movie, Room room, String startTime) throws InvalidStartTimeAndRoomException {
         for(Show show : room.getShows()) {
             if(show.getStartTime().equals(startTime)) {
-                JOptionPane.showMessageDialog(null, "A megadott terem és időpont már létezik!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-                return false;
+                throw new InvalidStartTimeAndRoomException("A megadott terem és időpont már létezik!", "Hiba!");
             }
         }
         
         return true;
     }
     
-    private static boolean startTimeRegExp(String startTime) {
+    private static boolean startTimeRegExp(String startTime) throws InvalidStartTimeFormationException, InvalidStartTimeIntervalException {
         String regexp = "[0-2]{1}[0-9]{1}:[0-5]{1}[0-9]{1}";
         if(!Pattern.compile(regexp).matcher(startTime).find()) {
-            JOptionPane.showMessageDialog(null, "A megadott időpont nem jó formátumú!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-            return false;
+            throw new InvalidStartTimeFormationException("A megadott időpont nem jó formátumú!", "Hiba!");
         }
         
         int hour = Integer.parseInt(startTime.split(":")[0]);
         if(!(hour >= 8 && hour <= 21)) {
-            JOptionPane.showMessageDialog(null, "A megadott időpont nem jó intervallumban van!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-            return false;
+            throw new InvalidStartTimeIntervalException("A megadott időpont nem jó intervallumban van!", "Hiba!");
         }
         
         return true;
     }
     
-    private static boolean movieParallel(Movie movie, String startTime) {
+    private static boolean movieParallel(Movie movie, String startTime) throws MovieParallelException {
         int n = 0;
         n = movie.getShows().stream().filter((show) -> (show.getStartTime().equals(startTime))).map((_item) -> 1).reduce(n, Integer::sum);
         
         if(n >= 3) {
-            JOptionPane.showMessageDialog(null, "A megadott film túlépte a párhuzamosági szintet!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-            return false;
+            throw new MovieParallelException("A megadott film túlépte a párhuzamosági szintet!", "Hiba!");
         }
         
         return true;
     }
     
-    private static boolean moviePlayNumber(Movie movie) {
+    private static boolean moviePlayNumber(Movie movie) throws MovieScreeningException{
         if(movie.getShows().size() == movie.getMaxPlay()) {
-            JOptionPane.showMessageDialog(null, "A megadott film túlépte a vetítési keretjét!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-            return false;
+            throw new MovieScreeningException("A megadott film túlépte a vetítési keretjét!", "Hiba!");
         }
         
         return true;
     }
     
-    private static boolean rightSchedule(Movie movie, Room room, String startTime) {
+    private static boolean rightSchedule(Movie movie, Room room, String startTime) throws MovieCollisionException {
         for(Show show : room.getShows()) {
             String endTime1 = plusThirtyMinutes(show.getStartTime(), show.getMovie().getLength());
             String endTime2 = plusThirtyMinutes(startTime, movie.getLength());
             
             if(isCrossed(startTime, show.getStartTime())) {
                 if(isCrossed(endTime1, startTime)) {
-                    JOptionPane.showMessageDialog(null, "A megadott film ütközik egy másik filmmel!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-                    return false;
+                    throw new MovieCollisionException("A megadott film ütközik egy másik filmmel!", "Hiba!");
                 }
             } else {
                 if(isCrossed(show.getStartTime(), endTime2)) {
-                    JOptionPane.showMessageDialog(null, "A megadott film ütközik egy másik filmmel!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-                    return false;
+                    throw new MovieCollisionException("A megadott film ütközik egy másik filmmel!", "Hiba!");
                 }
             }
         }
@@ -250,12 +257,11 @@ public class NewShowPanel extends JPanel {
         return ehs + ":" + ems;
     }
     
-    private static boolean movieAge(Movie movie, String startTime) {
+    private static boolean movieAge(Movie movie, String startTime) throws InvalidMovieAgeRestrictionException {
         int hour = Integer.parseInt(startTime.split(":")[0]);
         
         if(!((movie.getAge() == 4 && hour >= 17) || (movie.getAge() == 5 && hour >= 21 || movie.getAge() <= 3))) {
-            JOptionPane.showMessageDialog(null, "A megadott film korhatára nem megfelelő az időponthoz!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-            return false;
+            throw new InvalidMovieAgeRestrictionException("A megadott film korhatára nem megfelelő az időponthoz!", "Hiba!");
         }
         
         return true;

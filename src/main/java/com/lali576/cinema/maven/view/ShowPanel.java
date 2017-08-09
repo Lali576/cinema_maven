@@ -1,6 +1,9 @@
 package com.lali576.cinema.maven.view;
 
 import com.lali576.cinema.maven.controller.Logic;
+import com.lali576.cinema.maven.exception.ShowDatabaseException;
+import com.lali576.cinema.maven.exception.ShowsNotFoundByMovieTitleException;
+import com.lali576.cinema.maven.exception.ShowsNotFoundByRoomNameException;
 import com.lali576.cinema.maven.model.Movie;
 import com.lali576.cinema.maven.model.Room;
 import com.lali576.cinema.maven.model.Show;
@@ -17,19 +20,20 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class ShowPanel extends JPanel {
+
     private final Logic logic;
     private List<Show> shows;
     private final MainFrame mainFrame;
     public JTextField titleTextField;
     public JTextField roomNameTextField;
-    
+
     public ShowPanel(Logic logic, MainFrame mainFrame) {
         this.logic = logic;
         this.mainFrame = mainFrame;
         shows = logic.select.getShows();
         setupShowsPanel();
     }
-    
+
     private void setupShowsPanel() {
         removeAll();
         setLayout(new BorderLayout());
@@ -75,57 +79,60 @@ public class ShowPanel extends JPanel {
         revalidate();
         repaint();
     }
-    
-    private class GetShowsByMovieTitle implements ActionListener{
+
+    private class GetShowsByMovieTitle implements ActionListener {
+
         @Override
         public void actionPerformed(ActionEvent e) {
             String title = titleTextField.getText();
-            if(!title.trim().equals("")) {
-                List<Show> selectedShows = logic.select.getShowsByMovieTitle(title);
-                if(selectedShows != null) {
+            if (!title.trim().equals("")) {
+                try {
+                    List<Show> selectedShows = logic.select.getShowsByMovieTitle(title);
                     shows = selectedShows;
                     setupShowsPanel();
-                } else {
-                    JOptionPane.showMessageDialog(null, "A keresett film nem található!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-                }  
-            }   
-        } 
+                } catch(ShowDatabaseException ex) {
+                    ex.writeOutEception();
+                }
+            }
+        }
     }
-    
-    private class GetShowsByRoomName implements ActionListener{
+
+    private class GetShowsByRoomName implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             String roomName = roomNameTextField.getText();
-            if(!roomName.trim().equals("")) {                
-                List<Show> selectedShows = logic.select.getShowsByRoomName(roomName);
-                if(selectedShows != null) {
+            if (!roomName.trim().equals("")) {
+                try {
+                    List<Show> selectedShows = logic.select.getShowsByRoomName(roomName);
                     shows = selectedShows;
                     setupShowsPanel();
-                } else {
-                    JOptionPane.showMessageDialog(null, "A keresett terem nem található!", "Hiba!", JOptionPane.INFORMATION_MESSAGE);
-                }               
+                } catch (ShowsNotFoundByRoomNameException ex) {
+                    ex.writeOutEception();
+                }
             }
-        } 
-    } 
-    
-    private class GetMovieDetails implements ActionListener{
+        }
+    }
+
+    private class GetMovieDetails implements ActionListener {
+
         @Override
         public void actionPerformed(ActionEvent e) {
-            MovieButton btn = (MovieButton)e.getSource();
+            MovieButton btn = (MovieButton) e.getSource();
             Movie movie = btn.getMovie();
-            
+
             mainFrame.getMoviePanel(movie);
-        } 
-    }  
-    
+        }
+    }
+
     private class GetRoomDetails implements ActionListener {
-       @Override
+
+        @Override
         public void actionPerformed(ActionEvent e) {
-            RoomButton btn = (RoomButton)e.getSource();
+            RoomButton btn = (RoomButton) e.getSource();
             Room room = btn.getRoom();
             Show show = btn.getShow();
-            
+
             mainFrame.getRoomPanel(room, show);
-        } 
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.lali576.cinema.maven.controller;
 
+import com.lali576.cinema.maven.exception.InsertNewShowException;
 import com.lali576.cinema.maven.model.Show;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,22 +13,22 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Insert {
+
     Connection conn = null;
-    
+
     public Insert(Connection conn) {
         this.conn = conn;
     }
-    
+
     public void fillUpWithRegs() {
         try (
-            Scanner sc = new Scanner(new File("C:\\Users\\Tóth Ádám\\Documents\\NetBeansProjects\\cinema\\src\\hu\\elte\\wr14yr\\REGEK.txt"));
-        ) {
-            while(sc.hasNextLine()) {
+                Scanner sc = new Scanner(new File("C:\\Users\\Tóth Ádám\\Documents\\NetBeansProjects\\cinema\\src\\hu\\elte\\wr14yr\\REGEK.txt"));) {
+            while (sc.hasNextLine()) {
                 String[] datas = sc.nextLine().split("; ");
                 String username = datas[0];
                 String password = datas[1];
                 boolean isAdmin = Boolean.parseBoolean(datas[2]);
-                
+
                 PreparedStatement prep = conn.prepareStatement("INSERT INTO REGISTERS (USERNAME, PASSWORD, ISADMIN) VALUES (?, ?, ?)");
                 prep.setString(1, username);
                 prep.setString(2, password);
@@ -38,12 +39,11 @@ public class Insert {
             Logger.getLogger(Insert.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-        
+
     public void fillUpWithMovies() {
         try (
-            Scanner sc = new Scanner(new File("C:\\Users\\Tóth Ádám\\Documents\\NetBeansProjects\\cinema\\src\\hu\\elte\\wr14yr\\FILMEK.txt"));
-        ) {
-            while(sc.hasNextLine()) {
+                Scanner sc = new Scanner(new File("C:\\Users\\Tóth Ádám\\Documents\\NetBeansProjects\\cinema\\src\\hu\\elte\\wr14yr\\FILMEK.txt"));) {
+            while (sc.hasNextLine()) {
                 String[] datas = sc.nextLine().split("; ");
                 String title = datas[0];
                 String country = datas[1];
@@ -53,7 +53,7 @@ public class Insert {
                 int length = Integer.parseInt(datas[5]);
                 int age = Integer.parseInt(datas[6]);
                 int maxPlay = Integer.parseInt(datas[7]);
-                
+
                 PreparedStatement prep = conn.prepareStatement("INSERT INTO MOVIES (TITLE, COUNTRY, ISDUBBED, DIRECTOR, SYNOPSIS, LENGTH)VALUES (?, ?, ?, ?, ?, ?)");
                 prep.setString(1, title);
                 prep.setString(2, country);
@@ -65,7 +65,7 @@ public class Insert {
 
                 ResultSet rs = conn.createStatement().executeQuery("SELECT ID FROM MOVIES ORDER BY ID DESC");
                 int movieID = 0;
-                if(rs.next()) {
+                if (rs.next()) {
                     movieID = rs.getInt("ID");
                 }
 
@@ -88,12 +88,11 @@ public class Insert {
             Logger.getLogger(Insert.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public void fillUpWithRooms() {
         try (
-            Scanner sc = new Scanner(new File("C:\\Users\\Tóth Ádám\\Documents\\NetBeansProjects\\cinema\\src\\hu\\elte\\wr14yr\\TERMEK.txt"));
-        ) {
-            while(sc.hasNextLine()) {
+                Scanner sc = new Scanner(new File("C:\\Users\\Tóth Ádám\\Documents\\NetBeansProjects\\cinema\\src\\hu\\elte\\wr14yr\\TERMEK.txt"));) {
+            while (sc.hasNextLine()) {
                 String[] actLine = sc.nextLine().split("; ");
                 String roomName = actLine[0];
                 int roomRow = Integer.parseInt(actLine[1]);
@@ -104,38 +103,42 @@ public class Insert {
                 prep.setInt(2, roomRow);
                 prep.setInt(3, roomColumn);
                 prep.executeUpdate();
-                        
+
                 ResultSet rs = conn.createStatement().executeQuery("SELECT ID FROM ROOMS ORDER BY ID DESC");
                 int roomID = 0;
-                
-                if(rs.next()) {
+
+                if (rs.next()) {
                     roomID = rs.getInt("ID");
                 }
-          
-                for(int i = 1; i <= roomRow; ++i) {
-                    for(int j = 1; j <= roomColumn ; ++j) {
+
+                for (int i = 1; i <= roomRow; ++i) {
+                    for (int j = 1; j <= roomColumn; ++j) {
                         prep = conn.prepareStatement("INSERT INTO SEATS (ROOMID, ROWNUMBER, COLUMNNUMBER) VALUES (?, ?, ?)");
                         prep.setInt(1, roomID);
                         prep.setInt(2, i);
                         prep.setInt(3, j);
-                        prep.executeUpdate();                                    
-                    }     
-                }                        
+                        prep.executeUpdate();
+                    }
+                }
             }
         } catch (FileNotFoundException | SQLException ex) {
             Logger.getLogger(Insert.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public void newShow(Show show) throws SQLException {
-        int movieID = show.getMovie().getID();
-        int roomID = show.getRoom().getID();
-        String startTime = show.getStartTime();
 
-        PreparedStatement prep = conn.prepareStatement("INSERT INTO SHOWS (MOVIEID, ROOMID, STARTTIME) VALUES (?, ?, ?)");
-        prep.setInt(1, movieID);
-        prep.setInt(2, roomID);
-        prep.setString(3, startTime);
-        prep.executeUpdate();   
+    public void newShow(Show show) throws InsertNewShowException {
+        try {
+            int movieID = show.getMovie().getID();
+            int roomID = show.getRoom().getID();
+            String startTime = show.getStartTime();
+
+            PreparedStatement prep = conn.prepareStatement("INSERT INTO SHOWS (MOVIEID, ROOMID, STARTTIME) VALUES (?, ?, ?)");
+            prep.setInt(1, movieID);
+            prep.setInt(2, roomID);
+            prep.setString(3, startTime);
+            prep.executeUpdate();
+        } catch(SQLException e) {
+            throw new InsertNewShowException("A megadott előadás felvétele közben hiba történt!", "Adatbázis hiba!");
+        }
     }
 }

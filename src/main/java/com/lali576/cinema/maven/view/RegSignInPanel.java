@@ -1,6 +1,7 @@
 package com.lali576.cinema.maven.view;
 
 import com.lali576.cinema.maven.controller.Logic;
+import com.lali576.cinema.maven.exception.InvalidUserException;
 import com.lali576.cinema.maven.model.Register;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -53,12 +54,12 @@ public class RegSignInPanel extends JPanel {
             String username = usernameTextField.getText();
             JPasswordField passwordField = (JPasswordField)btn.getParent().getComponent(3);
             String password = new String(passwordField.getPassword());
-    
-            Register reg = logic.select.getRegister(username, password);
-            if(reg != null) {
+
+            try {
+                Register reg = logic.select.getRegister(username, password);
                 mainFrame.getShowPanelByRegisterPanel(reg);
-            } else {
-                JOptionPane.showMessageDialog(null, "Hibás felhasználónév vagy jelszó!", "Bejelentkezési hiba!", JOptionPane.INFORMATION_MESSAGE);
+            } catch(InvalidUserException ex) {
+                ex.writeOutEception();
             }
         } 
     }

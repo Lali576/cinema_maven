@@ -1,6 +1,7 @@
 package com.lali576.cinema.maven.view;
 
 import com.lali576.cinema.maven.controller.Logic;
+import com.lali576.cinema.maven.exception.RoomDatabaseException;
 import com.lali576.cinema.maven.model.Room;
 import com.lali576.cinema.maven.model.Seat;
 import com.lali576.cinema.maven.model.Show;
@@ -13,8 +14,8 @@ import java.sql.SQLException;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
 
 public class RoomPanel extends JPanel {
     public final Logic logic;
@@ -78,6 +79,14 @@ public class RoomPanel extends JPanel {
        @Override
         public void actionPerformed(ActionEvent e) {           
             SeatButton seatButton = (SeatButton)e.getSource();
+            if(seatButton.isSelected()) {
+                seatButton.setSelected(false);
+                seatButton.setBorder(null);
+            } else {
+                seatButton.setSelected(true);
+                seatButton.setBorder(new LineBorder(Color.BLACK, 5));
+            }
+            //seatButton.repaint();
             if(seatButton.getColor() == Color.green && seatButton.getTicket() == null) {
                 ticketController.setText("Jegy vasarlas");
             } else {
@@ -109,8 +118,9 @@ public class RoomPanel extends JPanel {
                 }
                 room = logic.select.getRoomById(room.getID());
                 setupRoomPanel();
-            } catch(SQLException sqle) {
-                JOptionPane.showMessageDialog(null, "Az jegy értékesítése közben hiba lépett fel!", "Adatbázis hiba!", JOptionPane.INFORMATION_MESSAGE);
+            } catch(RoomDatabaseException ex) {
+                ex.writeOutEception();
+            } catch(SQLException ex) {
             }
         } 
     }

@@ -1,5 +1,9 @@
 package com.lali576.cinema.maven.controller;
 
+import com.lali576.cinema.maven.exception.InvalidUserException;
+import com.lali576.cinema.maven.exception.RoomDatabaseException;
+import com.lali576.cinema.maven.exception.ShowDatabaseException;
+import com.lali576.cinema.maven.exception.ShowsNotFoundByRoomNameException;
 import com.lali576.cinema.maven.model.Movie;
 import com.lali576.cinema.maven.model.Register;
 import com.lali576.cinema.maven.model.Room;
@@ -23,7 +27,7 @@ public class Select {
         this.conn = conn;
     }
     
-    public Register getRegister(final String username, final String password) {
+    public Register getRegister(final String username, final String password) throws InvalidUserException {
         try {
             PreparedStatement prep = conn.prepareStatement("SELECT USERNAME, ISADMIN FROM REGISTERS WHERE USERNAME = ? AND PASSWORD = ?");
             prep.setString(1, username);
@@ -34,6 +38,8 @@ public class Select {
                 String userName = rs.getString("USERNAME");
                 boolean isAdmin = rs.getBoolean("ISADMIN");
                 return new Register(userName, isAdmin);
+            } else {
+                throw new InvalidUserException("Hibás felhasználónév vagy jelszó!", "Bejelentkezési hiba!");
             }
         } catch(SQLException e) {
             
@@ -181,7 +187,7 @@ public class Select {
         return null;
     }
     
-    public Room getRoomById(int roomID) {
+    public Room getRoomById(int roomID) throws RoomDatabaseException{
         Room room = null;
         
         try {
@@ -201,10 +207,8 @@ public class Select {
             
             return room;
         } catch(SQLException e) {
-           
+           throw new RoomDatabaseException("Az jegy értékesítése közben hiba lépett fel!", "Adatbázis hiba!");
         }
-        
-        return null;
     }
     
     public List<List<Seat>> getSeatsByRoomId(int roomID, int roomRows, int roomColumns) {
@@ -260,8 +264,7 @@ public class Select {
             }
             
             return shows;
-        } catch(SQLException e) {
-            
+        } catch(SQLException | RoomDatabaseException e) {           
         }
         
         return null;
@@ -290,8 +293,7 @@ public class Select {
             }
             
             return shows;
-        } catch(SQLException e) {
-            
+        } catch(RoomDatabaseException | SQLException e) {           
         }
         
         return null;
@@ -320,14 +322,13 @@ public class Select {
             }
             
             return shows;
-        } catch(SQLException e) {
-            
+        } catch(RoomDatabaseException | SQLException e) {           
         }
         
         return null;
     }
     
-    public List<Show> getShowsByRoomName(String roomName) {
+    public List<Show> getShowsByRoomName(String roomName) throws ShowsNotFoundByRoomNameException {
         List<Show> shows = new ArrayList<>();
         
         try {
@@ -338,16 +339,17 @@ public class Select {
             if(rs.next()) {
                 int roomID = rs.getInt("ID");
                  return getShowsByRoomId(roomID);
+            } else {
+                throw new ShowsNotFoundByRoomNameException("A keresett szoba nem található!", "Hiba!");
             }
             
         } catch (SQLException ex) {
-            Logger.getLogger(Select.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return null;
     }
     
-    public List<Show> getShowsByMovieTitle(String title) {
+    public List<Show> getShowsByMovieTitle(String title) throws ShowDatabaseException {
         List<Show> shows = new ArrayList<>();
         PreparedStatement prep;
         try {
@@ -358,12 +360,12 @@ public class Select {
             if(rs.next()) {
                 int movieID = rs.getInt("ID");
                 return getShowsByMovieId(movieID);
+            } else {
+                throw new ShowDatabaseException("A keresett film nem található!", "Hiba!");
             }
-        } catch (SQLException ex) {
-            
+        } catch (SQLException ex) {          
         }
-        
-        
+                
         return null;
     }
     

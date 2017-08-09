@@ -2,6 +2,7 @@ package com.lali576.cinema.maven.view;
 
 import com.lali576.cinema.maven.model.Seat;
 import com.lali576.cinema.maven.model.Ticket;
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 import java.awt.Color;
 import java.awt.Dimension;
 import javax.swing.JButton;
@@ -24,7 +25,6 @@ public class SeatButton extends JButton {
         } else {
            setBackground(Color.red);
         }
-        
     }
     
     public Seat getSeat() {
